@@ -1,5 +1,8 @@
-from sqlalchemy import String, ForeignKey
+from typing import List
+
+from sqlalchemy import String, ForeignKey, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from flask_login import UserMixin
 
 from data.base import Base
 
@@ -18,10 +21,19 @@ class Tour(Base):
     date: Mapped[str] = mapped_column(String(100))
 
 
-class Reserve(Base):
-    __tablename__ = "reserve"
+tour_user_assoc = Table(    
+    "tour_user_assoc",
+    Base.metadata,
+    Column("tour_id", ForeignKey("tour.id"), primary_key=True),
+    Column("user_id", ForeignKey("user.id"), primary_key=True)
+)
+
+
+class User(Base, UserMixin):
+    __tablename__ ="users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(255))
-    tour_id: Mapped[int] = mapped_column(ForeignKey(Tour.id))
-    tour: Mapped[Tour] = relationship()
+    username: Mapped[str] = mapped_column(String(100))
+    email : Mapped[str] = mapped_column(String(102))
+    password: Mapped[str] = mapped_column(String(500))
+    tours: Mapped[List[Tour]] = relationship(secondary=tour_user_assoc)
